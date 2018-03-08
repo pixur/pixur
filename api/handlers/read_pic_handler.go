@@ -11,6 +11,7 @@ import (
 	"pixur.org/pixur/status"
 )
 
+// TODO: add tests
 func (s *serv) handleReadPic(rps api.PixurService_ReadPicServer) status.S {
 	if md, present := metadata.FromIncomingContext(rps.Context()); present {
 		if tokens, ok := md[pixPwtCookieName]; !ok || len(tokens) == 0 {
@@ -35,7 +36,7 @@ func (s *serv) handleReadPic(rps api.PixurService_ReadPicServer) status.S {
 	// ok, authed!
 
 	var f *os.File
-	for rps.Context().Err() != nil {
+	for rps.Context().Err() == nil {
 		req, err := rps.Recv()
 		if err == io.EOF {
 			return nil
@@ -74,7 +75,7 @@ func (s *serv) handleReadPic(rps api.PixurService_ReadPicServer) status.S {
 		}
 	}
 
-	return nil
+	return rps.Context().Err()
 }
 
 func getPathForReadPic(pixPath, rawPicID, typ string, thumbnail bool) (string, status.S) {
